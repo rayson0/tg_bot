@@ -19,7 +19,7 @@ PART_OF_URL = {
 correct_breeds = {
     'mush': 'malamute'
 }
-GAMES = ['Игра "Угадай-ка породу"', 'Получить фото по породе']
+GAMES = [['Игра "Угадай-ка породу"'], ['Получить фото по породе']]
 DB = DB('db/database.db')
 
 response = requests.get(API_URL + PART_OF_URL['all_breeds']).json()
@@ -70,7 +70,8 @@ def main():
 
 async def start(update, context, greeting=True):
     user = update.effective_user
-    reply_keyboard = [GAMES + ['История результатов']]
+    reply_keyboard = GAMES + [['История результатов']]
+    print(reply_keyboard)
     markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=False)
     if greeting:
         message = (f'Привет, {user.first_name}! Я бот, который ассоциируется '
@@ -85,7 +86,7 @@ async def start(update, context, greeting=True):
 
 async def show_results(update, context, all=False):
     results = DB.get_results(update.effective_user.id, all)
-    message = f'Статистика {'последних 3 или менее' if not all else 'всех'} игр:\n\n'
+    message = f'Статистика {"последних 3 или менее" if not all else "всех"} игр:\n\n'
     for get_points, all_points, date_time in results:
         date = '.'.join(date_time.split()[0].split('-')[::-1])
         time = date_time.split()[1][:date_time.split()[1].rindex('.')]
@@ -121,7 +122,7 @@ async def choice_breed_of_dog(update, context):
 
     breads_game1['correct'] = breads_game1.get('correct', []) + [await translate_breed(choice_breed)]
 
-    response = requests.get(f'{API_URL}/breed/{choice_breed}{PART_OF_URL['random_img']}').json()
+    response = requests.get(f'{API_URL}/breed/{choice_breed}{PART_OF_URL["random_img"]}').json()
 
     if response['status'] == 'error':
         message = ('Прости! Возникли неполадки! В данный момент не получится поиграть((\n\n'
@@ -169,7 +170,7 @@ async def exit_game1(update, context):
     message = (f'Тогда завершаем игру!\n\n{user.first_name}, ты показал хороший результат! ' +
                f'Твоя статистика: {get_points}/{all_points}\n\nПредлагаю сыграть снова!')
 
-    reply_keyboard = [GAMES + ['История результатов']]
+    reply_keyboard = GAMES + [['История результатов']]
     markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=False)
     await update.message.reply_text(
         message,
@@ -187,7 +188,7 @@ async def get_photo_of_dog(update, context, bread=False):
     markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=False)
 
     if bread:
-        response = requests.get(f'{API_URL}/breed/{bread}{PART_OF_URL['random_img']}').json()
+        response = requests.get(f'{API_URL}/breed/{bread}{PART_OF_URL["random_img"]}').json()
         if response['status'] == 'error':
             print(bread)
             message = 'Ой! Произошла ошибка! Давай попробуем выбрать снова!'
@@ -207,9 +208,9 @@ async def get_photo_of_dog(update, context, bread=False):
 
 async def answer_for_buttons(update, context):
     global is_game1, is_game2
-    if update.message.text == GAMES[0]:
+    if update.message.text == GAMES[0][0]:
         await rules_choice_breed_of_dog(update, context)
-    elif update.message.text == GAMES[1]:
+    elif update.message.text == GAMES[1][0]:
         await get_photo_of_dog(update, context)
         is_game2 = True
     elif update.message.text == 'История результатов':
