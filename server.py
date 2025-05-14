@@ -124,15 +124,7 @@ async def choice_breed_of_dog(update, context):
 
     response = requests.get(f'{API_URL}/breed/{choice_breed}{PART_OF_URL["random_img"]}').json()
 
-    if response['status'] == 'error':
-        message = ('Прости! Возникли неполадки! В данный момент не получится поиграть((\n\n'
-                   'Предлагаю вернуться в главное меню!')
-
-        reply_keyword = [['В главное меню']]
-        markup = ReplyKeyboardMarkup(reply_keyword, one_time_keyboard=False)
-        await update.message.reply_text(message,
-                                        reply_markup=markup)
-    else:
+    try:
         image = response['message']
 
         reply_keyword = [need_breeds_ru[:2], need_breeds_ru[2:]]
@@ -141,6 +133,14 @@ async def choice_breed_of_dog(update, context):
                                      image,
                                      caption='Кто это?',
                                      reply_markup=markup)
+    except:
+        message = ('Прости! Возникли неполадки! В данный момент не получится поиграть((\n\n'
+                   'Предлагаю вернуться в главное меню!')
+
+        reply_keyword = [['В главное меню']]
+        markup = ReplyKeyboardMarkup(reply_keyword, one_time_keyboard=False)
+        await update.message.reply_text(message,
+                                        reply_markup=markup)
 
 
 async def is_correct_choice_bread(update, context):
@@ -189,18 +189,17 @@ async def get_photo_of_dog(update, context, bread=False):
 
     if bread:
         response = requests.get(f'{API_URL}/breed/{bread}{PART_OF_URL["random_img"]}').json()
-        if response['status'] == 'error':
-            print(bread)
-            message = 'Ой! Произошла ошибка! Давай попробуем выбрать снова!'
-            await update.message.reply_text(message,
-                                            reply_markup=markup)
-        else:
+        try:
             image = response['message']
             message = 'Держи заветное фото!\n\n' + message
             await context.bot.send_photo(update.message.chat_id,
                                          image,
                                          caption=message,
                                          reply_markup=markup)
+        except:
+            message = 'Ой! Произошла ошибка! Давай попробуем выбрать снова!'
+            await update.message.reply_text(message,
+                                            reply_markup=markup)
     else:
         await update.message.reply_text(message,
                                         reply_markup=markup)
